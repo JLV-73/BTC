@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="BTC by JLV - Bitcoin macro, on-chain and portfolio intelligence terminal for GitHub Pages.">
+  <title>BTC by JLV</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/echarts@5.5.0/dist/echarts.min.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+  <div class="ambient-grid" aria-hidden="true"></div>
+  <a class="corner-logo" href="#top" aria-label="Back to top">
+    <img src="logo_JLV.jpg" alt="JLV logo">
+  </a>
+
+  <header class="topbar" id="top">
+    <div class="brand-lockup">
+      <p class="eyebrow">Bitcoin Macro / On-chain / Portfolio</p>
+      <h1>BTC by JLV</h1>
+      <p class="brand-subtitle">Bitcoin Macro, On-Chain &amp; Portfolio Intelligence</p>
+    </div>
+
+    <nav class="topnav" aria-label="Primary">
+      <a href="#overview">Overview</a>
+      <a href="#market">Market</a>
+      <a href="#chart">Candles</a>
+      <a href="#secondary">Analytics</a>
+      <a href="#onchain">On-chain</a>
+      <a href="#macro">Macro</a>
+      <a href="#sentiment">Sentiment</a>
+      <a href="#portfolio">Portfolio</a>
+      <a href="#alerts">Alerts</a>
+      <a href="#settings">Settings</a>
+    </nav>
+
+    <div class="topbar-actions">
+      <div class="ticker-chip">
+        <span class="chip-label">BTC Spot</span>
+        <strong id="header-price">--</strong>
+      </div>
+      <div class="ticker-chip">
+        <span class="chip-label">24H</span>
+        <strong id="header-change">--</strong>
+      </div>
+      <div class="ticker-chip">
+        <span class="chip-label">Refresh</span>
+        <strong id="header-refresh">Standby</strong>
+      </div>
+      <div class="ticker-chip live-chip" id="ws-chip">
+        <span class="live-dot" id="ws-dot"></span>
+        <strong id="ws-status">WS standby</strong>
+      </div>
+      <label class="select-shell" for="currency-select">
+        <span class="chip-label">Currency</span>
+        <select id="currency-select" aria-label="Display currency">
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+          <option value="CHF">CHF</option>
+        </select>
+      </label>
+      <button class="button ghost" id="manual-refresh" type="button">Refresh now</button>
+    </div>
+  </header>
+
+  <main class="app-shell">
+    <section class="section-panel hero-panel" id="overview" data-module="overview">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Hero Summary</p>
+          <h2>Bitcoin intelligence cockpit</h2>
+        </div>
+        <div class="badges-inline">
+          <span class="pill" id="overview-regime-pill">Regime --</span>
+          <span class="pill" id="overview-fear-pill">Sentiment --</span>
+          <span class="pill" id="overview-fee-pill">Fees --</span>
+        </div>
+      </div>
+
+      <div class="hero-grid">
+        <div class="hero-copy">
+          <p class="hero-kicker">Institutional dashboard</p>
+          <h3>Live market structure, network pressure, macro context and portfolio sensitivity in one static terminal.</h3>
+          <p class="hero-text">
+            The dashboard is designed for a dense but controlled trading-desk workflow: live BTC market cards,
+            candlestick analytics, on-chain pressure, macro overlays, sentiment heuristics and scenario-driven
+            portfolio math with local persistence.
+          </p>
+          <div class="hero-actions">
+            <a class="button" href="#chart">Open chart deck</a>
+            <a class="button ghost" href="#portfolio">Open portfolio lab</a>
+          </div>
+          <div class="hero-status-block">
+            <div class="status-row">
+              <span class="status-label">Rule-based stance</span>
+              <strong id="overview-stance-copy">Waiting for live inputs.</strong>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Data cadence</span>
+              <strong id="overview-data-cadence">Polling initialized.</strong>
+            </div>
+            <div class="status-row">
+              <span class="status-label">Last block</span>
+              <strong id="overview-last-block">--</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-board">
+          <article class="metric-tile spotlight">
+            <span class="tile-label">BTC Spot</span>
+            <strong class="tile-value" id="hero-price">--</strong>
+            <span class="tile-foot" id="hero-price-note">Awaiting market feed</span>
+          </article>
+          <article class="metric-tile">
+            <span class="tile-label">24H Delta</span>
+            <strong class="tile-value" id="hero-change">--</strong>
+            <span class="tile-foot" id="hero-change-note">Spot momentum</span>
+          </article>
+          <article class="metric-tile">
+            <span class="tile-label">Market Cap</span>
+            <strong class="tile-value" id="hero-marketcap">--</strong>
+            <span class="tile-foot" id="hero-dominance-note">BTC dominance --</span>
+          </article>
+          <article class="metric-tile">
+            <span class="tile-label">Sats / unit</span>
+            <strong class="tile-value" id="hero-sats">--</strong>
+            <span class="tile-foot" id="hero-sats-note">Scarcity lens</span>
+          </article>
+          <article class="metric-tile">
+            <span class="tile-label">ATH Distance</span>
+            <strong class="tile-value" id="hero-ath-distance">--</strong>
+            <span class="tile-foot" id="hero-ath-note">Current drawdown</span>
+          </article>
+          <article class="metric-tile">
+            <span class="tile-label">Supply Mined</span>
+            <strong class="tile-value" id="hero-supply">--</strong>
+            <span class="tile-foot" id="hero-supply-note">Toward 21M cap</span>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-panel command-panel" id="settings" data-module="settings">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Controls &amp; Preferences</p>
+          <h2>Customizable command dock</h2>
+        </div>
+        <p class="section-copy">
+          Persist currency, modules, chart overlays, portfolio inputs and layout preferences directly in localStorage.
+        </p>
+      </div>
+
+      <div class="control-grid">
+        <article class="control-card">
+          <h3>Module visibility</h3>
+          <div class="toggle-cluster">
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="market" checked> Market</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="chart" checked> Candles</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="secondary" checked> Analytics</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="onchain" checked> On-chain</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="macro" checked> Macro</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="sentiment" checked> Sentiment</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="portfolio" checked> Portfolio</label>
+            <label class="toggle-chip"><input type="checkbox" data-module-toggle="alerts" checked> Alerts</label>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Terminal behavior</h3>
+          <div class="control-stack">
+            <label class="inline-control" for="auto-refresh-toggle"><span>Auto refresh</span><input id="auto-refresh-toggle" type="checkbox" checked></label>
+            <label class="inline-control" for="compact-mode-toggle"><span>Compact mode</span><input id="compact-mode-toggle" type="checkbox"></label>
+            <label class="inline-control" for="tooltips-toggle"><span>Tooltips</span><input id="tooltips-toggle" type="checkbox" checked></label>
+            <label class="inline-control" for="refresh-interval-select">
+              <span>Refresh cadence</span>
+              <select id="refresh-interval-select">
+                <option value="30000">30 sec</option>
+                <option value="60000">60 sec</option>
+                <option value="120000">2 min</option>
+                <option value="300000">5 min</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Chart stack</h3>
+          <div class="toggle-group">
+            <p class="control-subhead">Overlays</p>
+            <div class="toggle-cluster">
+              <label class="toggle-chip"><input type="checkbox" data-overlay-toggle="sma20" checked> SMA 20</label>
+              <label class="toggle-chip"><input type="checkbox" data-overlay-toggle="sma50" checked> SMA 50</label>
+              <label class="toggle-chip"><input type="checkbox" data-overlay-toggle="sma200"> SMA 200</label>
+              <label class="toggle-chip"><input type="checkbox" data-overlay-toggle="ema21" checked> EMA 21</label>
+              <label class="toggle-chip"><input type="checkbox" data-overlay-toggle="vwap"> VWAP</label>
+            </div>
+          </div>
+          <div class="toggle-group">
+            <p class="control-subhead">Panels</p>
+            <div class="toggle-cluster">
+              <label class="toggle-chip"><input type="checkbox" data-panel-toggle="volume" checked> Volume</label>
+              <label class="toggle-chip"><input type="checkbox" data-panel-toggle="rsi" checked> RSI</label>
+              <label class="toggle-chip"><input type="checkbox" data-panel-toggle="macd"> MACD</label>
+            </div>
+          </div>
+        </article>
+
+        <article class="control-card">
+          <h3>Persistence</h3>
+          <div class="button-row">
+            <button class="button" id="save-config" type="button">Save config</button>
+            <button class="button ghost" id="export-config" type="button">Export JSON</button>
+            <button class="button ghost" id="import-trigger" type="button">Import JSON</button>
+            <button class="button danger" id="reset-config" type="button">Reset</button>
+          </div>
+          <input id="import-config" type="file" accept="application/json" hidden>
+          <p class="settings-note" id="settings-feedback">Local persistence ready.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="market" data-module="market">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Live Market Dashboard</p>
+          <h2>Core BTC KPIs</h2>
+        </div>
+        <p class="section-copy">Institutional summary cards for spot, breadth, liquidity and ATH context.</p>
+      </div>
+
+      <div class="kpi-grid">
+        <article class="stat-card"><span class="card-label">BTC price</span><strong class="card-value" id="market-price">--</strong><span class="card-foot" id="market-price-foot">Spot reference</span></article>
+        <article class="stat-card"><span class="card-label">24H change</span><strong class="card-value" id="market-change-24h">--</strong><span class="card-foot" id="market-change-24h-foot">Daily momentum</span></article>
+        <article class="stat-card"><span class="card-label">7D change</span><strong class="card-value" id="market-change-7d">--</strong><span class="card-foot" id="market-change-7d-foot">Weekly impulse</span></article>
+        <article class="stat-card"><span class="card-label">30D change</span><strong class="card-value" id="market-change-30d">--</strong><span class="card-foot" id="market-change-30d-foot">Monthly trend</span></article>
+        <article class="stat-card"><span class="card-label">Market cap</span><strong class="card-value" id="market-cap">--</strong><span class="card-foot" id="market-cap-foot">Capitalization</span></article>
+        <article class="stat-card"><span class="card-label">24H volume</span><strong class="card-value" id="market-volume">--</strong><span class="card-foot" id="market-volume-foot">Spot liquidity</span></article>
+        <article class="stat-card"><span class="card-label">Circulating supply</span><strong class="card-value" id="market-supply">--</strong><span class="card-foot" id="market-supply-foot">Coins mined</span></article>
+        <article class="stat-card"><span class="card-label">All-time high</span><strong class="card-value" id="market-ath">--</strong><span class="card-foot" id="market-ath-foot">Cycle peak</span></article>
+        <article class="stat-card"><span class="card-label">Distance from ATH</span><strong class="card-value" id="market-distance-ath">--</strong><span class="card-foot" id="market-distance-ath-foot">Current drawdown</span></article>
+        <article class="stat-card"><span class="card-label">BTC dominance</span><strong class="card-value" id="market-dominance">--</strong><span class="card-foot" id="market-dominance-foot">Share of crypto market cap</span></article>
+        <article class="stat-card accent"><span class="card-label">Rule-based bias</span><strong class="card-value" id="market-bias">--</strong><span class="card-foot" id="market-bias-foot">Bullish / neutral / bearish</span></article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="chart" data-module="chart">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Candlestick Zone</p>
+          <h2>Primary BTC chart deck</h2>
+        </div>
+        <div class="button-row compact">
+          <button class="button timeframe-button is-active" type="button" data-timeframe="1H" aria-pressed="true">1H</button>
+          <button class="button timeframe-button ghost" type="button" data-timeframe="4H" aria-pressed="false">4H</button>
+          <button class="button timeframe-button ghost" type="button" data-timeframe="1D" aria-pressed="false">1D</button>
+          <button class="button timeframe-button ghost" type="button" data-timeframe="1W" aria-pressed="false">1W</button>
+        </div>
+      </div>
+
+      <div class="chart-stage primary-chart-stage" id="primary-chart-stage">
+        <article class="chart-card primary-card">
+          <div class="chart-toolbar">
+            <div class="legend-cluster">
+              <span class="legend-pill green">Up candles</span>
+              <span class="legend-pill red">Down candles</span>
+              <span class="legend-pill muted" id="chart-currency-pill">Chart currency --</span>
+            </div>
+            <div class="chart-toolbar-actions">
+              <p class="chart-caption" id="chart-caption">Waiting for Binance OHLC feed.</p>
+              <button class="button ghost compact" id="primary-chart-fullscreen" type="button" aria-pressed="false">Expand chart</button>
+            </div>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas primary-canvas" id="primary-chart" aria-label="Primary candlestick chart"></div>
+            <div class="panel-status" id="primary-chart-status" role="status">Loading chart engine...</div>
+          </div>
+        </article>
+
+        <aside class="chart-rail">
+          <article class="rail-card">
+            <span class="card-label">Last candle close</span>
+            <strong class="card-value" id="chart-last-close">--</strong>
+            <span class="card-foot" id="chart-last-close-foot">Awaiting OHLC</span>
+          </article>
+          <article class="rail-card">
+            <span class="card-label">Session range</span>
+            <strong class="card-value" id="chart-session-range">--</strong>
+            <span class="card-foot" id="chart-session-range-foot">High / low</span>
+          </article>
+          <article class="rail-card">
+            <span class="card-label">Volume</span>
+            <strong class="card-value" id="chart-volume">--</strong>
+            <span class="card-foot" id="chart-volume-foot">Last interval turnover</span>
+          </article>
+          <article class="rail-card">
+            <span class="card-label">Active overlays</span>
+            <strong class="card-value" id="chart-overlays-active">--</strong>
+            <span class="card-foot" id="chart-panels-active">Panels --</span>
+          </article>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section-panel" id="secondary" data-module="secondary">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Secondary Charts</p>
+          <h2>Performance, drawdown, liquidity and volatility</h2>
+        </div>
+        <div class="button-row compact">
+          <button class="button range-button is-active" type="button" data-range="1" aria-pressed="true">24H</button>
+          <button class="button range-button ghost" type="button" data-range="7" aria-pressed="false">7D</button>
+          <button class="button range-button ghost" type="button" data-range="30" aria-pressed="false">30D</button>
+          <button class="button range-button ghost" type="button" data-range="90" aria-pressed="false">90D</button>
+          <button class="button range-button ghost" type="button" data-range="365" aria-pressed="false">1Y</button>
+          <button class="button range-button ghost" type="button" data-range="max" aria-pressed="false">MAX</button>
+        </div>
+      </div>
+
+      <div class="secondary-grid">
+        <article class="chart-card">
+          <div class="chart-card-head">
+            <h3>Performance curve</h3>
+            <p>Selected range normalized return path.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="performance-chart"></div>
+            <div class="panel-status" id="performance-chart-status" role="status">Loading performance history...</div>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-card-head">
+            <h3>Drawdown from ATH</h3>
+            <p>Running drawdown against local range peak.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="drawdown-chart"></div>
+            <div class="panel-status" id="drawdown-chart-status" role="status">Preparing drawdown series...</div>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-card-head">
+            <h3>Volume evolution</h3>
+            <p>CoinGecko total volume history in the selected range.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="volume-chart"></div>
+            <div class="panel-status" id="volume-chart-status" role="status">Loading volume series...</div>
+          </div>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-card-head">
+            <h3>Trend / volatility cockpit</h3>
+            <p>Rolling realized volatility and price distance versus trend baseline.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="trend-chart"></div>
+            <div class="panel-status" id="trend-chart-status" role="status">Computing trend diagnostics...</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="onchain" data-module="onchain">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">On-Chain Observatory</p>
+          <h2>Network pressure and scarcity monitoring</h2>
+        </div>
+        <p class="section-copy">mempool.space feeds for fees, mempool congestion, block cadence and hashrate context.</p>
+      </div>
+
+      <div class="onchain-grid">
+        <div class="onchain-cards">
+          <article class="stat-card compact"><span class="card-label">Low fee</span><strong class="card-value" id="onchain-fee-low">--</strong><span class="card-foot">sat/vB economy</span></article>
+          <article class="stat-card compact"><span class="card-label">Medium fee</span><strong class="card-value" id="onchain-fee-medium">--</strong><span class="card-foot">sat/vB target</span></article>
+          <article class="stat-card compact"><span class="card-label">High fee</span><strong class="card-value" id="onchain-fee-high">--</strong><span class="card-foot">sat/vB priority</span></article>
+          <article class="stat-card compact"><span class="card-label">Block height</span><strong class="card-value" id="onchain-block-height">--</strong><span class="card-foot">Latest tip</span></article>
+          <article class="stat-card compact"><span class="card-label">Difficulty</span><strong class="card-value" id="onchain-difficulty">--</strong><span class="card-foot" id="onchain-difficulty-foot">Adjustment pending</span></article>
+          <article class="stat-card compact"><span class="card-label">Hashrate</span><strong class="card-value" id="onchain-hashrate">--</strong><span class="card-foot">1M average</span></article>
+          <article class="stat-card compact"><span class="card-label">Unconfirmed tx</span><strong class="card-value" id="onchain-unconfirmed">--</strong><span class="card-foot">Mempool queue</span></article>
+          <article class="stat-card compact"><span class="card-label">Next block fee floor</span><strong class="card-value" id="onchain-next-block">--</strong><span class="card-foot">Fast inclusion proxy</span></article>
+          <article class="stat-card compact"><span class="card-label">Subsidy / epoch</span><strong class="card-value" id="onchain-subsidy">--</strong><span class="card-foot" id="onchain-subsidy-foot">Post-halving emission</span></article>
+          <article class="stat-card compact"><span class="card-label">Halving countdown</span><strong class="card-value" id="onchain-halving">--</strong><span class="card-foot" id="onchain-halving-foot">Approximate blocks remaining</span></article>
+          <article class="stat-card compact"><span class="card-label">Sats per unit</span><strong class="card-value" id="onchain-sats">--</strong><span class="card-foot">Scarcity per fiat unit</span></article>
+        </div>
+
+        <article class="scarcity-card" data-tooltip="Shows mined BTC, remaining BTC and how close the network is to the 21M hard cap.">
+          <div class="chart-card-head">
+            <h3>Total supply progress</h3>
+            <p>Scarcity is the structural anchor of the dashboard.</p>
+          </div>
+          <div class="scarcity-body">
+            <div><span class="card-label">Mined BTC</span><strong class="card-value" id="supply-mined">--</strong></div>
+            <div><span class="card-label">Remaining BTC</span><strong class="card-value" id="supply-remaining">--</strong></div>
+            <div><span class="card-label">Percent mined</span><strong class="card-value" id="supply-percent">--</strong></div>
+          </div>
+          <div class="progress-track" aria-hidden="true"><span class="progress-fill" id="supply-progress"></span></div>
+          <p class="scarcity-caption" id="supply-caption">Waiting for supply data.</p>
+        </article>
+
+        <article class="chart-card">
+          <div class="chart-card-head">
+            <h3>Hashrate trend</h3>
+            <p>Rolling network security proxy over the last month.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="onchain-chart"></div>
+            <div class="panel-status" id="onchain-chart-status" role="status">Loading hashrate history...</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="macro" data-module="macro">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Macro Dashboard</p>
+          <h2>Rates, liquidity and growth context</h2>
+        </div>
+        <p class="section-copy">FRED-backed series with graceful placeholders when a feed is unavailable or no key is configured.</p>
+      </div>
+
+      <div class="toggle-cluster macro-toggle-cluster">
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="dgs10" checked> US 10Y</label>
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="fedfunds" checked> Fed funds</label>
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="cpi" checked> CPI YoY</label>
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="m2"> M2</label>
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="dxy" checked> DXY proxy</label>
+        <label class="toggle-chip"><input type="checkbox" data-macro-toggle="unrate"> Unemployment</label>
+      </div>
+
+      <div class="macro-grid">
+        <div class="kpi-grid macro-kpis">
+          <article class="stat-card macro-card" data-series-card="dgs10"><span class="card-label">US 10Y</span><strong class="card-value" id="macro-dgs10">--</strong><span class="card-foot" id="macro-dgs10-foot">Loading / optional feed</span></article>
+          <article class="stat-card macro-card" data-series-card="fedfunds"><span class="card-label">Fed funds</span><strong class="card-value" id="macro-fedfunds">--</strong><span class="card-foot" id="macro-fedfunds-foot">Loading / optional feed</span></article>
+          <article class="stat-card macro-card" data-series-card="cpi"><span class="card-label">CPI YoY</span><strong class="card-value" id="macro-cpi">--</strong><span class="card-foot" id="macro-cpi-foot">Inflation impulse</span></article>
+          <article class="stat-card macro-card" data-series-card="m2"><span class="card-label">M2</span><strong class="card-value" id="macro-m2">--</strong><span class="card-foot" id="macro-m2-foot">Liquidity backdrop</span></article>
+          <article class="stat-card macro-card" data-series-card="dxy"><span class="card-label">DXY proxy</span><strong class="card-value" id="macro-dxy">--</strong><span class="card-foot" id="macro-dxy-foot">Dollar pressure</span></article>
+          <article class="stat-card macro-card" data-series-card="unrate"><span class="card-label">Unemployment</span><strong class="card-value" id="macro-unrate">--</strong><span class="card-foot" id="macro-unrate-foot">Labor slack</span></article>
+        </div>
+
+        <article class="chart-card macro-chart-card">
+          <div class="chart-card-head">
+            <h3>BTC versus macro proxies</h3>
+            <p>Normalized comparison for enabled series over a one-year window.</p>
+          </div>
+          <div class="chart-shell">
+            <div class="chart-canvas" id="macro-chart"></div>
+            <div class="panel-status" id="macro-chart-status" role="status">Loading macro comparison...</div>
+          </div>
+        </article>
+
+        <article class="note-card macro-note-card">
+          <h3>Macro feed note</h3>
+          <p id="macro-note">
+            FRED access can run via a configured API key or a best-effort CSV fallback. When neither route works,
+            the dashboard preserves the layout and shows placeholders instead of breaking.
+          </p>
+          <div class="tag-cloud" id="macro-tags">
+            <span class="tag">Liquidity --</span>
+            <span class="tag">Rates --</span>
+            <span class="tag">Inflation --</span>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="sentiment" data-module="sentiment">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Sentiment &amp; Positioning</p>
+          <h2>Psychology and rule-based market regime</h2>
+        </div>
+        <p class="section-copy">Fear &amp; Greed, regime tags and placeholder hooks for optional positioning feeds.</p>
+      </div>
+
+      <div class="sentiment-grid">
+        <article class="gauge-card">
+          <div class="chart-card-head">
+            <h3>Fear &amp; Greed</h3>
+            <p>Alternative.me sentiment index.</p>
+          </div>
+          <div class="gauge-shell">
+            <div class="fear-gauge" id="fear-gauge">
+              <div class="fear-gauge-inner">
+                <strong id="fear-value">--</strong>
+                <span id="fear-classification">Awaiting feed</span>
+              </div>
+            </div>
+          </div>
+          <p class="gauge-foot" id="fear-foot">Visible rules drive the regime panel and alert console.</p>
+        </article>
+
+        <article class="note-card">
+          <h3>Regime panel</h3>
+          <div class="tag-cloud" id="sentiment-tags">
+            <span class="tag">risk-on</span>
+            <span class="tag">risk-off</span>
+            <span class="tag">overheated</span>
+            <span class="tag">accumulation</span>
+            <span class="tag">panic</span>
+          </div>
+          <p id="sentiment-summary">Loading rule-based regime interpretation.</p>
+        </article>
+
+        <article class="note-card">
+          <h3>Positioning architecture</h3>
+          <ul class="placeholder-list">
+            <li><span>Funding / perp basis</span><strong id="positioning-funding">Optional feed</strong></li>
+            <li><span>Options OI / skew</span><strong id="positioning-options">Optional feed</strong></li>
+            <li><span>Basis dashboard</span><strong id="positioning-basis">Optional feed</strong></li>
+            <li><span>Interpretation</span><strong id="positioning-copy">Static hosting safe by default.</strong></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+
+    <section class="section-panel" id="portfolio" data-module="portfolio">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Portfolio Analysis</p>
+          <h2>BTC exposure, P/L and scenario mapping</h2>
+        </div>
+        <p class="section-copy">User inputs are stored locally and recalculated on every live price refresh.</p>
+      </div>
+
+      <div class="portfolio-grid">
+        <article class="form-card">
+          <h3>Portfolio inputs</h3>
+          <div class="form-grid">
+            <label for="portfolio-btc-held"><span>BTC held</span><input id="portfolio-btc-held" type="number" step="0.00000001" min="0" value="1.25"></label>
+            <label for="portfolio-avg-price"><span>Average purchase price</span><input id="portfolio-avg-price" type="number" step="0.01" min="0" value="54000"></label>
+            <label for="portfolio-cash"><span>Deployable fiat cash</span><input id="portfolio-cash" type="number" step="0.01" min="0" value="25000"></label>
+            <label for="portfolio-target-btc"><span>Target BTC amount</span><input id="portfolio-target-btc" type="number" step="0.00000001" min="0" value="2"></label>
+            <label for="portfolio-target-sell"><span>Target sell price</span><input id="portfolio-target-sell" type="number" step="0.01" min="0" value="150000"></label>
+            <label for="portfolio-base-currency">
+              <span>Base currency</span>
+              <select id="portfolio-base-currency">
+                <option value="USD">USD</option>
+                <option value="EUR">EUR</option>
+                <option value="GBP">GBP</option>
+                <option value="CHF">CHF</option>
+              </select>
+            </label>
+          </div>
+        </article>
+
+        <div class="portfolio-results">
+          <div class="kpi-grid">
+            <article class="stat-card"><span class="card-label">Current value</span><strong class="card-value" id="portfolio-current-value">--</strong><span class="card-foot">Live mark-to-market</span></article>
+            <article class="stat-card"><span class="card-label">Unrealized P/L</span><strong class="card-value" id="portfolio-unrealized-pl">--</strong><span class="card-foot" id="portfolio-unrealized-pl-foot">Absolute change</span></article>
+            <article class="stat-card"><span class="card-label">Unrealized P/L %</span><strong class="card-value" id="portfolio-unrealized-pl-percent">--</strong><span class="card-foot">Relative performance</span></article>
+            <article class="stat-card"><span class="card-label">Break-even</span><strong class="card-value" id="portfolio-break-even">--</strong><span class="card-foot" id="portfolio-break-even-foot">Distance to break-even</span></article>
+            <article class="stat-card"><span class="card-label">Value at ATH</span><strong class="card-value" id="portfolio-value-ath">--</strong><span class="card-foot">At current cycle ATH</span></article>
+            <article class="stat-card"><span class="card-label">Sats held</span><strong class="card-value" id="portfolio-sats-held">--</strong><span class="card-foot">1 BTC = 100,000,000 sats</span></article>
+            <article class="stat-card"><span class="card-label">Share of 21M</span><strong class="card-value" id="portfolio-supply-share">--</strong><span class="card-foot">Portfolio share of max supply</span></article>
+            <article class="stat-card"><span class="card-label">Target BTC gap</span><strong class="card-value" id="portfolio-target-gap">--</strong><span class="card-foot">Distance to target allocation</span></article>
+          </div>
+
+          <div class="scenario-strip">
+            <article class="scenario-card"><span>150k USD scenario</span><strong id="scenario-150k">--</strong></article>
+            <article class="scenario-card"><span>250k USD scenario</span><strong id="scenario-250k">--</strong></article>
+            <article class="scenario-card"><span>500k USD scenario</span><strong id="scenario-500k">--</strong></article>
+            <article class="scenario-card"><span>1M USD scenario</span><strong id="scenario-1m">--</strong></article>
+          </div>
+
+          <div class="interpretation-grid">
+            <article class="note-card">
+              <h3>DCA summary</h3>
+              <p id="portfolio-dca-summary">Waiting for live price to compute a blended cost basis.</p>
+            </article>
+            <article class="note-card">
+              <h3>Scenario stance</h3>
+              <p id="portfolio-interpretation">Portfolio interpretation will appear here once pricing data is available.</p>
+            </article>
+            <article class="note-card">
+              <h3>Simple cases</h3>
+              <ul class="scenario-list">
+                <li><span>Conservative</span><strong id="portfolio-case-conservative">--</strong></li>
+                <li><span>Base case</span><strong id="portfolio-case-base">--</strong></li>
+                <li><span>Aggressive</span><strong id="portfolio-case-aggressive">--</strong></li>
+              </ul>
+            </article>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-panel" id="alerts" data-module="alerts">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow">Alerts &amp; Signal Zone</p>
+          <h2>Generated observations and data health</h2>
+        </div>
+        <p class="section-copy">Signals are computed client-side with transparent rules and no backend dependence.</p>
+      </div>
+
+      <div class="alerts-grid">
+        <article class="note-card">
+          <h3>Signal console</h3>
+          <ul class="alerts-list" id="alerts-list">
+            <li class="alert-item neutral">
+              <div>
+                <strong>System bootstrap</strong>
+                <p>Alerts will populate after the first refresh cycle.</p>
+              </div>
+              <span class="severity-pill">INFO</span>
+            </li>
+          </ul>
+        </article>
+
+        <article class="note-card">
+          <h3>Signal matrix</h3>
+          <div class="signal-matrix" id="signal-matrix">
+            <div class="signal-box"><span>Market regime</span><strong>--</strong></div>
+            <div class="signal-box"><span>Network stress</span><strong>--</strong></div>
+            <div class="signal-box"><span>Portfolio state</span><strong>--</strong></div>
+            <div class="signal-box"><span>Macro state</span><strong>--</strong></div>
+          </div>
+        </article>
+
+        <article class="note-card">
+          <h3>Data health</h3>
+          <ul class="placeholder-list" id="data-health-list">
+            <li><span>CoinGecko</span><strong>Waiting</strong></li>
+            <li><span>Binance</span><strong>Waiting</strong></li>
+            <li><span>mempool.space</span><strong>Waiting</strong></li>
+            <li><span>Alternative.me</span><strong>Waiting</strong></li>
+            <li><span>FRED</span><strong>Optional</strong></li>
+          </ul>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div>
+      <p class="eyebrow">Data Sources</p>
+      <p class="footer-copy">
+        Market and conversion metrics: CoinGecko. OHLC and live ticker: Binance public APIs and WebSocket.
+        On-chain telemetry: mempool.space. Sentiment: Alternative.me Fear &amp; Greed.
+        Macro: FRED when configured or reachable through public fallbacks.
+      </p>
+    </div>
+    <div>
+      <p class="eyebrow">Disclaimers</p>
+      <p class="footer-copy">
+        This terminal is for analysis and education, not financial advice. Static hosting means API availability,
+        rate limits and browser CORS policies can affect individual modules. No private API key is embedded by default.
+      </p>
+    </div>
+  </footer>
+</body>
+</html>
