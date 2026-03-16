@@ -1,0 +1,739 @@
+MODE D'EMPLOI ET LECTURE DES INDICES - BTC by JLV
+=================================================
+
+But du document
+----------------
+Ce fichier sert de guide de lecture complet du site BTC by JLV.
+Il explique :
+- comment utiliser le tableau de bord ;
+- a quoi correspond chaque valeur visible ;
+- comment interpreter son impact ;
+- quelles regles internes le site applique pour produire ses biais, tags et alertes.
+
+Important
+---------
+- Le site est un terminal d'analyse, pas un conseil financier.
+- Quand une valeur affiche "--", "Feed pending", "Disabled", "Optional", "Unavailable" ou un placeholder, cela signifie en general qu'une source n'a pas repondu, qu'un module a ete desactive, ou qu'une API optionnelle n'est pas disponible.
+- Une partie des cartes reprend plusieurs fois la meme information dans des zones differentes. C'est normal : le site privilegie la lecture rapide.
+
+
+1. MODE D'EMPLOI DU SITE
+========================
+
+1.1 Barre superieure
+--------------------
+La barre du haut donne l'etat instantane du terminal :
+
+- BTC Spot : dernier prix BTC dans la devise selectionnee.
+- 24H : variation sur 24 heures.
+- Refresh : dernier rafraichissement complet du tableau de bord.
+- WS status : etat du WebSocket Binance utilise pour les mises a jour rapides du header.
+- Currency : devise d'affichage generale du site (USD, EUR, GBP, CHF).
+- Refresh now : force un rafraichissement manuel.
+
+Lecture pratique :
+- "WS live" = le header recoit un flux rapide.
+- "WS degraded" ou "WS retrying" = le flux temps reel est perturbe, mais le site peut continuer a fonctionner via les refresh classiques.
+- "WS off" = pas de flux WebSocket, generalement parce que l'auto refresh est coupe ou indisponible.
+
+1.2 Section Settings / Controls & Preferences
+---------------------------------------------
+Cette section sert a piloter le site.
+
+Module visibility
+- Permet de masquer ou d'afficher les grandes sections : Market, Candles, Analytics, On-chain, Macro, Sentiment, Portfolio, Alerts.
+- Impact : utile pour se concentrer sur une vue trader, investor, macro ou portefeuille.
+
+Terminal behavior
+- Auto refresh : active ou coupe le rafraichissement automatique.
+- Compact mode : resserre l'interface.
+- Tooltips : active ou coupe les bulles d'aide.
+- Refresh cadence : choisit la frequence de polling (30 sec, 60 sec, 2 min, 5 min).
+
+Chart stack
+- Overlays : active ou coupe SMA 20, SMA 50, SMA 200, EMA 21, VWAP.
+- Panels : active ou coupe Volume, RSI, MACD sous le graphique principal.
+
+Persistence
+- Save config : sauvegarde la configuration courante dans le navigateur.
+- Export JSON : exporte la configuration.
+- Import JSON : reimporte une configuration.
+- Reset : remet la configuration par defaut.
+
+1.3 Lecture generale des couleurs et etats
+------------------------------------------
+- Vert = lecture positive, haussiere, gain, etat live, severite faible.
+- Rouge = lecture negative, baissiere, perte, etat erreur, severite elevee.
+- Bleu / "cold" = lecture defensive, risk-off, pression negative ou refroidissement.
+- Or = information secondaire, oscillateur, accent visuel ou mesure intermediaire.
+- Gris / mute = information descriptive ou placeholder.
+
+Etats de sante des donnees
+- Live : source repond normalement.
+- Refreshing : mise a jour en cours.
+- Unavailable : source momentanement indisponible.
+- Optional / placeholder : module garde la place dans l'interface mais sans donnees exploitables.
+- Disabled : serie volontairement coupee.
+- Bundled fallback / Public fallback : une route de secours est utilisee a la place du flux principal.
+
+
+2. LECTURE DETAILLEE PAR ZONE
+=============================
+
+2.1 Hero Summary
+----------------
+
+Pills du hero
+
+Regime
+- Definition : synthese reglee par le moteur interne "Bullish", "Neutral" ou "Bearish".
+- Impact : donne la lecture immediate du contexte de marche selon momentum, proximite des plus hauts, sentiment et pression reseau.
+
+Sentiment
+- Definition : resume du Fear & Greed (classification + valeur).
+- Impact : sert de filtre psychologique. Plus il est eleve, plus le marche est confiant ; plus il est bas, plus le stress est fort.
+
+Fees
+- Definition : niveau de fee prioritaire en sat/vB.
+- Impact : mesure la pression court terme sur l'espace bloc. Des fees eleves signalent souvent une chaine plus congestionnee et un environnement plus nerveux.
+
+Bloc statut
+
+Rule-based stance
+- Definition : commentaire textuel produit par la logique de regime.
+- Impact : transforme plusieurs signaux en une conclusion de lecture rapide.
+
+Data cadence
+- Definition : rappelle si le site tourne en refresh auto ou manuel, et a quel rythme.
+- Impact : important pour savoir si les chiffres sont fraichement recalcules ou non.
+
+Last block
+- Definition : dernier block height connu via mempool.space.
+- Impact : donne un repere temps reseau et nourrit le calcul de halving.
+
+Tuiles hero
+
+BTC Spot
+- Definition : prix courant du BTC dans la devise choisie.
+- Impact : valeur de reference principale du site.
+
+24H Delta
+- Definition : variation du prix sur 24 heures.
+- Impact : indique le momentum tres court terme. Positif = impulsion immediate ; negatif = faiblesse immediate.
+
+Market Cap
+- Definition : capitalisation boursiere du BTC.
+- Impact : mesure le poids economique total du reseau. Une hausse conforte l'ampleur du move, pas seulement le prix unitaire.
+
+Sats / unit
+- Definition : nombre de satoshis achetables avec 1 unite de la devise choisie. Formule : 100000000 / prix d'un BTC.
+- Impact : excellent angle de lecture "scarcity". Si la valeur baisse, une unite monetaire achete moins de BTC, donc le BTC est plus "cher" dans cette devise.
+
+ATH Distance
+- Definition : distance du prix actuel par rapport au plus haut historique du cycle connu par CoinGecko.
+- Impact : proche de 0 % = zone proche des sommets ; tres negatif = drawdown profond.
+
+Supply Mined
+- Definition : part du stock deja mine par rapport au plafond de 21 millions. Formule : circulating supply / max supply.
+- Impact : rappelle la rarete structurelle du BTC. Plus la part minee est elevee, plus la part restante a emettre se reduit.
+
+2.2 Market - Core BTC KPIs
+--------------------------
+
+BTC price
+- Definition : meme logique que BTC Spot.
+- Impact : reference de toutes les lectures de performance et portefeuille.
+
+24H change
+- Definition : variation 24 heures.
+- Impact : impulsion intraday / journaliere.
+
+7D change
+- Definition : variation sur 7 jours.
+- Impact : mesure le momentum hebdomadaire. Positif = marche en traction ; negatif = deterioration recente.
+
+30D change
+- Definition : variation sur 30 jours.
+- Impact : donne le biais mensuel. Plus utile pour juger si le mouvement depasse le simple bruit court terme.
+
+Market cap
+- Definition : capitalisation totale du BTC.
+- Impact : lecture de profondeur et de taille du marche.
+
+24H volume
+- Definition : volume total spot sur 24 heures.
+- Impact : proxy de liquidite et de participation. Un mouvement de prix confirme par le volume est generalement plus credible.
+
+Circulating supply
+- Definition : nombre de BTC deja emis et circulants.
+- Impact : sert au calcul de rarete et rappelle que le stock disponible n'est pas extensible comme une action diluable.
+
+All-time high
+- Definition : plus haut historique du BTC pour la devise choisie.
+- Impact : niveau de reference psychologique majeur.
+
+Distance from ATH
+- Definition : ecart actuel au plus haut historique.
+- Impact : plus l'ecart est faible, plus le marche entre dans une zone ou breakout et rejet sont tous deux probables.
+
+BTC dominance
+- Definition : part de la capitalisation du BTC dans la capitalisation totale crypto.
+- Impact : dominance en hausse = le BTC capte relativement plus de capital que le reste du marche ; dominance en baisse = rotation potentielle vers les altcoins ou baisse relative du leadership BTC.
+
+Rule-based bias
+- Definition : resultat du score interne de marche : Bullish, Neutral ou Bearish.
+- Impact : filtre de synthese pour lecture rapide.
+
+Regle exacte du Rule-based bias
+- +1 point si le 7D est positif.
+- +1 point si le 30D est positif.
+- +1 point si le BTC est a moins de 25 % de son ATH (distance > -25 %).
+- +0.5 si le Fear & Greed est superieur a 55.
+- -0.5 si le Fear & Greed est inferieur a 25.
+- -0.5 si la fee prioritaire depasse 20 sat/vB.
+- Score >= 2.5 = Bullish.
+- Score <= 0.5 = Bearish.
+- Entre les deux = Neutral.
+
+2.3 Primary BTC chart deck
+--------------------------
+
+Timeframes
+- 1H : une bougie = 1 heure.
+- 4H : une bougie = 4 heures.
+- 1D : une bougie = 1 jour.
+- 1W : une bougie = 1 semaine.
+
+Impact des timeframes
+- Plus l'unite est courte, plus le bruit et la nervosite augmentent.
+- Plus l'unite est longue, plus la lecture se rapproche du trend structurel.
+
+Couleurs des bougies
+- Verte : cloture >= ouverture.
+- Rouge : cloture < ouverture.
+- Impact : lecture immediate du sens de la bougie.
+
+Valeurs du rail lateral
+
+Last candle close
+- Definition : dernier cours de cloture de la bougie la plus recente.
+- Impact : reference court terme la plus recente du graphique.
+
+Session range
+- Definition : plus haut / plus bas de la derniere bougie.
+- Impact : mesure l'amplitude de la derniere unite de temps ; plus l'ecart est large, plus la volatilite immediate est forte.
+
+Volume
+- Definition : volume BTC echange sur la derniere bougie.
+- Impact : un move soutenu par un volume fort est plus significatif qu'un move sur volume faible.
+
+Active overlays
+- Definition : liste des surcouches actives.
+- Impact : rappelle ce qui est effectivement trace a l'ecran.
+
+Panels
+- Definition : liste des panneaux secondaires actifs sous le graphique principal.
+- Impact : permet de savoir si la lecture inclut volume, RSI et/ou MACD.
+
+Definitions des overlays
+
+SMA 20
+- Definition : moyenne mobile simple sur 20 bougies.
+- Impact : suit la tendance courte. Prix au-dessus = biais court terme plutot fort ; prix en dessous = faiblesse relative.
+
+SMA 50
+- Definition : moyenne mobile simple sur 50 bougies.
+- Impact : filtre intermediaire de tendance. Souvent utile pour separer simple rebond et vraie reprise.
+
+SMA 200
+- Definition : moyenne mobile simple sur 200 bougies.
+- Impact : repere de tendance lourde. Le passage au-dessus ou au-dessous change souvent la lecture de fond.
+
+EMA 21
+- Definition : moyenne mobile exponentielle sur 21 bougies, plus reactive qu'une SMA.
+- Impact : suit plus vite les inflexions de momentum. Souvent utile pour les pullbacks en marche haussiere.
+
+VWAP
+- Definition : Volume Weighted Average Price, moyenne du prix ponderee par les volumes sur la serie visible.
+- Impact : proxy de "prix moyen negocie". Prix au-dessus = acheteurs dominants ; prix au-dessous = execution moyenne moins favorable.
+
+Definitions des panneaux
+
+Volume panel
+- Definition : histogramme de volume par bougie.
+- Impact : confirme ou infirme un breakout, un rejet ou une acceleration.
+
+RSI
+- Definition : oscillateur de momentum sur 14 periodes, borne entre 0 et 100.
+- Impact :
+  - au-dessus de 70 : marche potentiellement surachete / echauffe ;
+  - en dessous de 30 : marche potentiellement survendu / stresse ;
+  - autour de 50 : equilibre relatif.
+
+MACD
+- Definition : difference entre EMA 12 et EMA 26, avec une ligne signal EMA 9 et un histogramme.
+- Impact :
+  - MACD au-dessus de la ligne signal = impulsion plutot haussiere ;
+  - MACD en dessous = impulsion plutot baissiere ;
+  - histogramme positif = acceleration haussiere ;
+  - histogramme negatif = acceleration baissiere.
+
+2.4 Secondary charts
+--------------------
+
+Boutons de range
+- 24H, 7D, 30D, 90D, 1Y, MAX.
+- Impact : changent la fenetre d'observation des graphiques secondaires.
+
+Performance curve
+- Definition : courbe de performance normalisee a 100 au debut de la periode choisie.
+- Impact : sert a mesurer la trajectoire relative, pas le niveau absolu du prix.
+
+Drawdown from ATH
+- Definition : drawdown courant par rapport au pic local atteint dans la plage selectionnee.
+- Impact : mesure l'ampleur de la baisse depuis le sommet du range. Utile pour evaluer le risque de retracement subi.
+
+Volume evolution
+- Definition : historique de volume total sur la periode selectionnee.
+- Impact : permet de voir si l'interet du marche augmente ou se contracte.
+
+Trend / volatility cockpit
+- Definition : combine deux series :
+  - realized volatility : volatilite realisee annualisee calculee a partir des log returns ;
+  - trend spread : distance du prix par rapport a une moyenne mobile de base.
+- Impact :
+  - volatilite en hausse = risque de variation plus large, stops et sizing plus sensibles ;
+  - trend spread positif = prix au-dessus de sa ligne de tendance de reference ;
+  - trend spread negatif = prix sous sa ligne de tendance.
+
+2.5 On-chain Observatory
+------------------------
+
+Low fee
+- Definition : fee "economy" en sat/vB.
+- Impact : cout bas pour une confirmation moins urgente.
+
+Medium fee
+- Definition : fee intermediaire en sat/vB.
+- Impact : compromis cout / rapidite.
+
+High fee
+- Definition : fee prioritaire en sat/vB.
+- Impact : proxy du cout pour passer vite dans un bloc. Hausse = pression reseau plus forte.
+
+Block height
+- Definition : hauteur du dernier bloc connu.
+- Impact : repere temporel on-chain et base de calcul du prochain halving.
+
+Difficulty
+- Definition : difficulte de minage actuelle.
+- Impact : plus elle est elevee, plus la competition des mineurs est intense. C'est aussi un proxy indirect de maturite et de securite du reseau.
+
+Difficulty foot
+- Definition : variation de difficulte attendue au prochain ajustement + nombre de blocs restants.
+- Impact : aide a anticiper si la pression de minage se renforce ou se detend.
+
+Hashrate
+- Definition : puissance de calcul du reseau, formatee en EH/s.
+- Impact : hashrate eleve = securite du reseau plus forte et confiance economique plus importante des mineurs.
+
+Unconfirmed tx
+- Definition : nombre de transactions en attente dans le mempool.
+- Impact : si ce nombre monte fort, la congestion augmente et les fees ont tendance a monter.
+
+Next block fee floor
+- Definition : niveau de fee rapide proche du minimum utile pour viser l'inclusion rapide.
+- Impact : lecture immediate de la tension mempool.
+
+Subsidy / epoch
+- Definition : emission BTC par bloc dans l'epoch actuelle. La formule interne suit 50 / (2^epoch).
+- Impact : rappelle le niveau actuel de creation monetaire. Plus l'epoch avance, plus l'emission se reduit.
+
+Halving countdown
+- Definition : nombre de blocs restants avant le prochain halving, avec une estimation en jours.
+- Impact : plus on se rapproche du halving, plus la thematique de rarete peut reprendre du poids dans le narratif de marche.
+
+Sats per unit
+- Definition : meme logique que dans le hero, appliquee au bloc on-chain.
+- Impact : repere pedagogique de rarete dans la devise choisie.
+
+Total supply progress
+
+Mined BTC
+- Definition : quantite totale deja emise.
+- Impact : visualise le stock deja cree.
+
+Remaining BTC
+- Definition : quantite theoretique encore a miner jusqu'a 21 millions.
+- Impact : montre la reserve d'emission encore disponible, qui se reduit continuellement.
+
+Percent mined
+- Definition : pourcentage du plafond de 21 millions deja mine.
+- Impact : plus ce pourcentage monte, plus la rarete future est visible.
+
+Progress bar
+- Definition : traduction visuelle du pourcentage mine.
+- Impact : lecture instantanee du chemin deja parcouru vers le hard cap.
+
+Hashrate trend
+- Definition : historique glissant du hashrate sur 1 mois.
+- Impact : permet de voir si la securite / engagement des mineurs se renforce ou se tasse.
+
+2.6 Macro Dashboard
+-------------------
+
+Le module macro compare le BTC a des series FRED ou a des routes de secours.
+
+US 10Y
+- Definition : rendement du Treasury US a 10 ans.
+- Impact : si ce taux monte, le cout d'opportunite des actifs non productifs de cash-flow peut augmenter. Cela peut peser sur l'appetit risque.
+
+Fed funds
+- Definition : taux directeur de la Fed.
+- Impact : plus il est eleve, plus l'environnement monetaire est restrictif. Des baisses de taux sont souvent lues comme un soutien potentiel a la liquidite.
+
+CPI YoY
+- Definition : inflation annuelle, calculee ici en variation sur 12 mois de l'indice CPI.
+- Impact : inflation forte peut soutenir le narratif "store of value", mais elle peut aussi maintenir des taux eleves. Il faut donc lire cette carte avec les taux, pas seule.
+
+M2
+- Definition : croissance annuelle de la masse monetaire M2.
+- Impact : acceleration de M2 = toile de fond plus liquide ; contraction ou faiblesse = toile de fond moins favorable aux actifs a beta eleve.
+
+DXY proxy
+- Definition : proxy de force du dollar.
+- Impact : dollar fort = vent contraire frequent pour les actifs risques ; dollar plus faible = respiration potentielle pour le BTC et le risque.
+
+Unemployment
+- Definition : taux de chomage.
+- Impact : remontee du chomage = economie qui se refroidit ; selon le contexte, cela peut annoncer pression risque a court terme ou assouplissement monetaire plus tard.
+
+Lecture des cartes macro
+- La grande valeur affiche le dernier point disponible.
+- Le pied de carte affiche le delta contre le point precedent.
+- Si une serie est desactivee, la carte affiche "Disabled".
+
+BTC versus macro proxies
+- Definition : comparaison normalisee sur 1 an entre BTC et les series macro actives.
+- Impact : utile pour voir si le BTC surperforme ou diverge par rapport aux grandes forces macro.
+
+Macro tags
+- Definition : tags automatiques bases sur les dernieres valeurs disponibles.
+- Impact :
+  - Inflation "hot" = inflation au-dessus de 3 % ;
+  - Dollar "hot" = DXY proxy au-dessus de 120 ;
+  - les taux US 10Y et Fed Funds sont rappeles tels quels.
+
+Macro feed note
+- Definition : commentaire sur la source effectivement utilisee.
+- Impact : aide a savoir si la donnee vient de l'API FRED officielle, d'un fallback public, ou d'un snapshot embarque.
+
+Sources macro possibles dans le site
+- Official FRED API : meilleur cas, si une cle est configuree.
+- Public FRED fallback : route publique si elle passe dans le navigateur.
+- Bundled fallback : snapshot mensuel integre au code si les routes live ne passent pas.
+
+2.7 Sentiment & Positioning
+---------------------------
+
+Fear & Greed
+- Definition : indice de sentiment Alternative.me, de 0 a 100.
+- Impact general :
+  - bas = peur, stress, capitulation possible ;
+  - haut = confiance, euphorie, risque de surchauffe.
+
+Classification Fear & Greed
+- Definition : libelle textuel associe a la valeur.
+- Impact : version lisible du score numerique.
+
+Regime tags
+- Definition : tags produits par des regles transparentes dans le script.
+- Impact : servent a qualifier l'etat emotionnel et tactique du marche.
+
+Regles exactes des tags
+- risk-on : 7D positif ET Fear & Greed > 55.
+- risk-off : 7D negatif OU Fear & Greed < 35.
+- overheated : Fear & Greed >= 75 ET distance a l'ATH > -12 %.
+- accumulation : Fear & Greed <= 35 ET 30D > -10 %.
+- panic : Fear & Greed < 20 OU fee prioritaire > 30 sat/vB.
+
+Interpretation des tags
+- risk-on : environnement plus porteur pour la prise de risque.
+- risk-off : environnement plus defensif.
+- overheated : marche possiblement trop tendu, risque de rejet.
+- accumulation : stress present mais destruction pas totale ; peut correspondre a une zone de construction.
+- panic : stress brutal, execution plus delicate, volatilite souvent plus elevee.
+
+Positioning architecture
+- Definition : placeholders prevus pour funding / perp basis, options OI / skew et basis dashboard.
+- Impact : ces zones n'influencent pas encore directement le site tant que les feeds optionnels ne sont pas branches.
+
+2.8 Portfolio Analysis
+----------------------
+
+Inputs
+
+BTC held
+- Definition : nombre de BTC detenus.
+- Impact : base de tous les calculs portefeuille.
+
+Average purchase price
+- Definition : prix moyen d'achat.
+- Impact : sert au calcul du cout de revient, du P/L latent et de la distance au point mort.
+
+Deployable fiat cash
+- Definition : cash disponible pour renforcer.
+- Impact : sert au resume DCA et au recalcul du cout moyen potentiel.
+
+Target BTC amount
+- Definition : taille cible de position en BTC.
+- Impact : permet de mesurer l'ecart entre l'exposition actuelle et l'exposition souhaitee.
+
+Target sell price
+- Definition : prix de vente vise par l'utilisateur.
+- Impact : sert a l'interpretation tactique du portefeuille.
+
+Base currency
+- Definition : devise de pilotage du portefeuille.
+- Impact : tous les resultats portefeuille sont convertis dans cette devise.
+
+Resultats portefeuille
+
+Current value
+- Definition : BTC held x prix live.
+- Impact : valorisation instantanee du portefeuille.
+
+Unrealized P/L
+- Definition : current value - cost basis.
+- Impact : gain ou perte latent(e) en valeur absolue.
+
+Unrealized P/L %
+- Definition : gain ou perte latente en pourcentage du cout de revient.
+- Impact : mesure la performance relative reelle de la position.
+
+Break-even
+- Definition : prix moyen d'achat.
+- Impact : niveau a partir duquel la position repasse "a l'equilibre" hors frais et fiscalite.
+
+Distance to break-even
+- Definition : ecart entre le prix live et le prix moyen.
+- Impact : indique si le portefeuille est en profit, proche de l'equilibre ou sous l'eau.
+
+Value at ATH
+- Definition : valeur theorique de la position si le prix revenait a l'ATH actuel connu.
+- Impact : montre ce que vaudrait le portefeuille sur simple retour au sommet precedent.
+
+Sats held
+- Definition : BTC held x 100000000.
+- Impact : lecture fine de l'accumulation en satoshis.
+
+Share of 21M
+- Definition : part du portefeuille par rapport au stock maximum de 21 millions. Formule : held / 21000000 x 100.
+- Impact : mesure symbolique de rarete et de position relative dans l'offre totale finale.
+
+Target BTC gap
+- Definition : max(target BTC - BTC held, 0).
+- Impact : si le gap est positif, la taille cible n'est pas atteinte ; si le gap est 0, la taille cible est deja atteinte ou depassee.
+
+Scenario strip
+- Definition : valorisation du portefeuille si le BTC atteignait 150k, 250k, 500k ou 1M USD, convertie dans la devise portefeuille.
+- Impact : sert a visualiser les ordres de grandeur de gain potentiels.
+
+DCA summary
+- Definition : estime combien de BTC le cash disponible permet d'acheter maintenant et quel serait le nouveau prix moyen.
+- Impact : utile pour arbitrer un renforcement immediat vs attente.
+
+Scenario stance
+- Definition : commentaire automatique sur le portefeuille.
+- Impact : transforme le P/L, la distance a l'objectif et l'upside residuel en lecture tactique.
+
+Regles exactes de Scenario stance
+- Si le portefeuille est a plus de 35 % de gain latent ET que l'upside jusqu'au prix cible est inferieur a 40 %, le site suggere qu'un de-risking ou une prise partielle peut se discuter.
+- Si le portefeuille est en perte latente ET que la cible de taille n'est pas atteinte, le site insiste plutot sur la discipline DCA.
+- Sinon, la lecture reste "equilibree".
+
+Simple cases
+- Conservative : valeur theorique de la position a 100k USD/BTC.
+- Base case : valeur theorique de la position a 150k USD/BTC.
+- Aggressive : valeur theorique de la position a 250k USD/BTC.
+- Impact : donne trois reperes de valorisation sans attendre les grands scenarios du bandeau.
+
+Badge portefeuille dans la signal matrix
+- In profit : si le P/L implicite depasse +20 %.
+- Underwater : si le P/L implicite est sous -10 %.
+- Near basis : entre les deux.
+
+2.9 Alerts & Signal Zone
+------------------------
+
+Signal console
+- Definition : liste d'alertes generees cote client, sans backend.
+- Impact : transforme les indicateurs bruts en observations actionnables ou au moins surveillables.
+
+Alertes actuellement prevues par le code
+
+Market regime
+- Definition : reprend le resultat Bullish / Neutral / Bearish.
+- Impact : ancre le contexte general.
+
+Momentum expansion
+- Definition : apparait si le 24H > 4 %.
+- Impact : signale une acceleration de prix et probablement plus de volatilite court terme.
+
+Near all-time high zone
+- Definition : apparait si le prix est a moins de 10 % de l'ATH.
+- Impact : zone ou breakout et rejet deviennent tous deux plus probables.
+
+Sentiment under pressure
+- Definition : apparait si Fear & Greed < 25.
+- Impact : marche en stress, possible capitulation ou fenetre d'accumulation plus profonde.
+
+Fee pressure elevated
+- Definition : apparait si la fee prioritaire depasse 20 sat/vB.
+- Impact : chaine plus chaude, execution on-chain potentiellement plus bruyante et plus couteuse.
+
+Halving window compression
+- Definition : apparait si moins de 25000 blocs restent avant le halving.
+- Impact : la thematique cycle / emission revient au premier plan.
+
+Core market feed missing
+- Definition : apparait si la data CoinGecko de base manque.
+- Impact : le site reste debout, mais la lecture marche et portefeuille est degradee.
+
+Signal matrix
+
+Market regime
+- Definition : resume du biais Bullish / Neutral / Bearish.
+- Impact : lecture de synthese du marche.
+
+Network stress
+- Definition : fee prioritaire en sat/vB.
+- Impact : plus la valeur monte, plus l'environnement on-chain est tendu.
+
+Portfolio state
+- Definition : badge "In profit", "Near basis" ou "Underwater".
+- Impact : lecture instantanee de l'etat du portefeuille.
+
+Macro state
+- Definition : "Available" si des series macro sont chargees, sinon "Placeholder".
+- Impact : indique si la couche macro est exploitable ou non.
+
+Data health
+- Definition : etat de sante par fournisseur.
+- Impact : essentiel pour savoir si une lecture partielle est due au marche... ou a une API indisponible.
+
+
+3. REGLES DE CALCUL A CONNAITRE
+===============================
+
+3.1 Conversions devises
+-----------------------
+- Le site recupere les prix BTC en USD, EUR, GBP et CHF via CoinGecko.
+- Les graphiques Binance BTCUSDT sont convertis dans la devise choisie via le ratio FX du BTC.
+- Impact : le prix ne vient pas d'une paire native EUR/GBP/CHF sur Binance ; il est converti depuis BTCUSDT.
+
+3.2 Sats per unit
+-----------------
+- Formule : 100000000 / prix du BTC dans la devise choisie.
+- Impact :
+  - si le BTC monte, le nombre de sats achetables avec 1 unite baisse ;
+  - si le BTC baisse, ce nombre remonte.
+
+3.3 Drawdown
+------------
+- Le graphique drawdown utilise le pic local de la plage selectionnee, pas necessairement l'ATH absolu de tous les temps.
+- Impact : en changeant de range, la lecture du drawdown change aussi.
+
+3.4 Volatilite realisee
+-----------------------
+- Le site calcule des log returns, puis une variance glissante, puis annualise la volatilite.
+- Impact : c'est une mesure statistique de variation, pas une prevision de direction.
+
+3.5 Supply / halving
+--------------------
+- Le halving est calcule avec des epochs de 210000 blocs.
+- Subsidy = 50 / (2^epoch).
+- Days remaining = estimation a partir d'environ 10 minutes par bloc.
+- Impact : c'est un compte a rebours indicatif, pas une date garantie a la minute pres.
+
+
+4. SOURCES DE DONNEES
+=====================
+
+CoinGecko
+- Prix spot, market cap, volume, supply, ATH, historique secondaire, conversions BTC/fiat.
+
+Binance
+- Bougies OHLC du graphique principal.
+- WebSocket mini ticker pour le header.
+
+mempool.space
+- Fees, mempool summary, block height, difficulty adjustment, hashrate.
+
+Alternative.me
+- Fear & Greed.
+
+FRED
+- Taux, inflation, M2, DXY proxy, chomage.
+
+
+5. CONSEILS DE LECTURE RAPIDE
+=============================
+
+Si tu veux une lecture "5 secondes"
+-----------------------------------
+Regarde dans cet ordre :
+- Regime ;
+- 7D et 30D change ;
+- Distance from ATH ;
+- Fear & Greed ;
+- High fee ;
+- BTC dominance.
+
+Si tu veux une lecture "trader court terme"
+-------------------------------------------
+Regarde :
+- 24H change ;
+- graphique principal ;
+- EMA 21, SMA 20, SMA 50 ;
+- RSI et MACD ;
+- session range ;
+- volume de la derniere bougie ;
+- fee prioritaire.
+
+Si tu veux une lecture "investisseur / cycle"
+---------------------------------------------
+Regarde :
+- 30D change ;
+- distance a l'ATH ;
+- supply mined ;
+- halving countdown ;
+- hashrate ;
+- dominance BTC ;
+- scenarios portefeuille.
+
+Si tu veux une lecture "macro"
+------------------------------
+Regarde ensemble :
+- US 10Y ;
+- Fed funds ;
+- CPI YoY ;
+- M2 ;
+- DXY proxy ;
+- comparaison BTC vs macro proxies.
+
+
+6. LIMITES A GARDER EN TETE
+===========================
+
+- Le site est statique : il depend d'APIs publiques.
+- Certaines routes peuvent etre bloquees par CORS, indisponibilite temporaire ou rate limit.
+- Les tags et alertes sont des heuristiques transparentes, pas des signaux infaillibles.
+- Les scenarios portefeuille ne tiennent pas compte des frais, du slippage, ni de la fiscalite.
+- Une meme valeur peut etre juste mathematiquement mais peu utile si sa source est stale ou fallback.
+
+
+7. RESUME EN UNE PHRASE
+=======================
+
+Le site combine prix, momentum, rarete, pression on-chain, contexte macro, psychologie de marche et simulation portefeuille pour offrir une lecture dense mais lisible du contexte Bitcoin.
