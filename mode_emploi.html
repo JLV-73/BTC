@@ -1,0 +1,471 @@
+<!DOCTYPE html><html lang="fr"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guide Utilisateur - Terminal d&#39;Analyse BTC by JLV</title>
+<style>
+        :root {
+            --bg-dark: #121418;
+            --bg-panel: #1e2228;
+            --bg-card: #2a2f38;
+            --text-main: #e0e6ed;
+            --text-muted: #8b949e;
+            --btc-orange: #f7931a;
+            --accent-blue: #29b6f6;
+            --success-green: #00c853;
+            --danger-red: #ff3d00;
+            --warning-gold: #ffd600;
+            --border-color: #30363d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 0;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            padding: 4rem 2rem;
+            background: linear-gradient(180deg, #1a1e24 0%, var(--bg-dark) 100%);
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 3rem;
+        }
+
+        header h1 {
+            color: var(--btc-orange);
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        header p {
+            color: var(--text-muted);
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        h2 {
+            color: var(--text-main);
+            font-size: 1.8rem;
+            margin-top: 3rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 24px;
+            background-color: var(--btc-orange);
+            border-radius: 4px;
+        }
+
+        h3 {
+            color: var(--accent-blue);
+            font-size: 1.4rem;
+            margin-top: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        ul, ol {
+            margin-bottom: 1.5rem;
+            padding-left: 2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--btc-orange);
+        }
+
+        .card h4 {
+            color: var(--btc-orange);
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .alert-box {
+            background-color: rgba(247, 147, 26, 0.1);
+            border-left: 4px solid var(--btc-orange);
+            padding: 1rem 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .alert-box strong {
+            color: var(--btc-orange);
+        }
+
+        .visual-placeholder {
+            background-color: var(--bg-card);
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            padding: 3rem 1rem;
+            text-align: center;
+            color: var(--text-muted);
+            margin: 2rem 0;
+            font-style: italic;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .visual-placeholder::before {
+            content: "📷";
+            font-size: 2rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .badge-green { background-color: rgba(0, 200, 83, 0.2); color: var(--success-green); }
+        .badge-red { background-color: rgba(255, 61, 0, 0.2); color: var(--danger-red); }
+        .badge-blue { background-color: rgba(41, 182, 246, 0.2); color: var(--accent-blue); }
+        .badge-gold { background-color: rgba(255, 214, 0, 0.2); color: var(--warning-gold); }
+        .badge-grey { background-color: rgba(139, 148, 158, 0.2); color: var(--text-muted); }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            background-color: var(--bg-panel);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-card);
+            color: var(--btc-orange);
+            font-weight: 600;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 3rem;
+            margin-top: 4rem;
+            border-top: 1px solid var(--border-color);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<header>
+<h1 id="section-1">BTC by JLV</h1>
+<p>Le guide complet pour maîtriser votre terminal d&#39;analyse Bitcoin. Découvrez comment interpréter les données de marché, on-chain, macroéconomiques et optimiser votre portefeuille.</p>
+</header>
+<div class="container">
+<div class="alert-box">
+<strong>⚠️ Avertissement Important :</strong> Ce site est un terminal d&#39;analyse de données et ne constitue en aucun cas un conseil financier. Les valeurs affichant &#34;--&#34;, &#34;Feed pending&#34; ou &#34;Unavailable&#34; indiquent qu&#39;une source de données est temporairement indisponible. La redondance de certaines informations est volontaire pour privilégier une lecture rapide.
+        </div>
+<!-- SECTION 1 -->
+<section id="introduction">
+<h2 id="section-1">1. Navigation Générale &amp; Paramètres</h2>
+<p>L&#39;interface est conçue pour vous offrir une vue d&#39;ensemble instantanée tout en permettant une personnalisation poussée selon votre profil (trader, investisseur, analyste macro).</p>
+<div class="visual-placeholder">
+                [Capture d&#39;écran : Vue globale du tableau de bord avec la barre supérieure et le menu des paramètres mis en évidence]
+            </div>
+<h3 id="section-1-1">1.1 La Barre Supérieure (Header)</h3>
+<p>Elle vous donne l&#39;état instantané du terminal :</p>
+<ul>
+<li><strong>BTC Spot &amp; 24H :</strong> Dernier prix et variation sur 24h.</li>
+<li><strong>WS Status :</strong> État de la connexion temps réel (WebSocket). <em>&#34;WS live&#34;</em> indique un flux optimal.</li>
+<li><strong>Currency :</strong> Devise d&#39;affichage (USD, EUR, GBP, CHF).</li>
+</ul>
+<h3 id="section-1-2">1.2 Contrôles &amp; Préférences (Settings)</h3>
+<div class="grid-2">
+<div class="card">
+<h4>👁️ Visibilité des Modules</h4>
+<p>Affichez ou masquez les sections selon vos besoins : Market, Candles, Analytics, On-chain, Macro, Sentiment, Portfolio, Alerts.</p>
+</div>
+<div class="card">
+<h4>⚙️ Comportement du Terminal</h4>
+<p>Gérez le rafraîchissement automatique (30s à 5min), activez le mode compact ou les bulles d&#39;aide (Tooltips).</p>
+</div>
+<div class="card">
+<h4>📊 Configuration Graphique</h4>
+<p>Activez les surcouches (SMA 20/50/200, EMA 21, VWAP) et les panneaux inférieurs (Volume, RSI, MACD).</p>
+</div>
+<div class="card">
+<h4>💾 Sauvegarde</h4>
+<p>Sauvegardez votre configuration dans le navigateur, exportez/importez en JSON ou réinitialisez par défaut.</p>
+</div>
+</div>
+<h3 id="section-1-3">1.3 Code Couleur et États de Santé</h3>
+<p>Le terminal utilise un code couleur strict pour une lecture intuitive :</p>
+<p>
+<span class="badge badge-green">Vert</span> Lecture positive, haussière, gain ou état &#34;Live&#34;.<br/>
+<span class="badge badge-red">Rouge</span> Lecture négative, baissière, perte ou erreur.<br/>
+<span class="badge badge-blue">Bleu</span> Lecture défensive, risk-off ou refroidissement.<br/>
+<span class="badge badge-gold">Or</span> Information secondaire, oscillateur ou accent visuel.<br/>
+<span class="badge badge-grey">Gris</span> Information descriptive ou espace réservé (placeholder).
+            </p>
+</section>
+<!-- SECTION 2 -->
+<section id="dashboard-overview">
+<h2 id="section-2">2. Vue d&#39;Ensemble du Marché (Hero &amp; KPIs)</h2>
+<h3 id="section-2-1">2.1 En-tête de Synthèse (Hero Summary)</h3>
+<p>Cette zone condense les informations vitales pour comprendre le contexte immédiat du marché.</p>
+<div class="visual-placeholder">
+                [Schéma : Décomposition de la zone &#34;Hero Summary&#34; avec flèches explicatives sur les &#34;Pills&#34; et les &#34;Tuiles&#34;]
+            </div>
+<div class="grid-3">
+<div class="card">
+<h4>Régime &amp; Sentiment</h4>
+<p>Synthèse du moteur interne (Bullish, Neutral, Bearish) et résumé du <em>Fear &amp; Greed Index</em>. Un sentiment élevé indique la confiance, un sentiment bas indique le stress.</p>
+</div>
+<div class="card">
+<h4>Frais (Fees) &amp; Réseau</h4>
+<p>Niveau de frais prioritaire en sat/vB. Des frais élevés signalent une congestion de la blockchain et une nervosité du marché.</p>
+</div>
+<div class="card">
+<h4>Sats / Unit &amp; Supply</h4>
+<p>Combien de Satoshis vous pouvez acheter avec 1 unité de votre devise. Affiche également la part des 21 millions de BTC déjà minée.</p>
+</div>
+</div>
+<h3 id="section-2-2">2.2 Indicateurs Clés (Core BTC KPIs)</h3>
+<table>
+<thead>
+<tr>
+<th>Indicateur</th>
+<th>Définition</th>
+<th>Impact / Interprétation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Variations (24H, 7D, 30D)</strong></td>
+<td>Évolution du prix sur différentes périodes.</td>
+<td>Mesure le momentum. Le 30D filtre le bruit court terme pour donner le biais mensuel.</td>
+</tr>
+<tr>
+<td><strong>Distance from ATH</strong></td>
+<td>Écart en % par rapport au plus haut historique.</td>
+<td>Proche de 0% = zone de sommet (breakout/rejet probable). Très négatif = drawdown profond.</td>
+</tr>
+<tr>
+<td><strong>BTC Dominance</strong></td>
+<td>Part du BTC dans la capitalisation crypto totale.</td>
+<td>En hausse : le BTC capte les capitaux. En baisse : rotation potentielle vers les altcoins.</td>
+</tr>
+</tbody>
+</table>
+<div class="alert-box">
+<strong>🧠 Comment est calculé le &#34;Rule-based bias&#34; ?</strong><br/>
+                Le score interne (Bullish, Neutral, Bearish) est calculé ainsi : +1 pt si 7D positif, +1 pt si 30D positif, +1 pt si distance ATH &gt; -25%, +0.5 pt si Fear &amp; Greed &gt; 55. Malus : -0.5 pt si Fear &amp; Greed &lt; 25, -0.5 pt si frais &gt; 20 sat/vB. <em>(Score ≥ 2.5 = Bullish, ≤ 0.5 = Bearish)</em>.
+            </div>
+</section>
+<!-- SECTION 3 -->
+<section id="charts">
+<h2 id="section-3">3. Analyse Graphique &amp; Technique</h2>
+<h3 id="section-3-1">3.1 Graphique Principal (Primary Chart Deck)</h3>
+<p>Le cœur de l&#39;analyse technique. Vous pouvez ajuster les unités de temps (1H, 4H, 1D, 1W) selon votre horizon d&#39;investissement.</p>
+<div class="visual-placeholder">
+                [Capture d&#39;écran : Graphique principal avec les moyennes mobiles (SMA/EMA) et le panneau RSI/MACD activés]
+            </div>
+<div class="grid-2">
+<div class="card">
+<h4>📈 Surcouches (Overlays)</h4>
+<ul>
+<li><strong>SMA 20 / 50 / 200 :</strong> Moyennes mobiles simples. La 200 est le repère de tendance lourde.</li>
+<li><strong>EMA 21 :</strong> Moyenne exponentielle, plus réactive pour suivre le momentum.</li>
+<li><strong>VWAP :</strong> Prix moyen pondéré par les volumes.</li>
+</ul>
+</div>
+<div class="card">
+<h4>📊 Panneaux Inférieurs (Panels)</h4>
+<ul>
+<li><strong>Volume :</strong> Confirme la force d&#39;un mouvement.</li>
+<li><strong>RSI (14) :</strong> &gt;;70 (suracheté), &lt;30 (survendu).</li>
+<li><strong>MACD :</strong> Analyse des impulsions et accélérations (croisement de la ligne signal).</li>
+</ul>
+</div>
+</div>
+<h3 id="section-3-2">3.2 Graphiques Secondaires</h3>
+<p>Ces graphiques permettent d&#39;analyser la performance relative et le risque :</p>
+<ul>
+<li><strong>Performance curve :</strong> Courbe normalisée à 100 pour mesurer la trajectoire relative.</li>
+<li><strong>Drawdown from ATH :</strong> Mesure l&#39;ampleur de la baisse depuis le sommet local de la période sélectionnée.</li>
+<li><strong>Trend / Volatility cockpit :</strong> Combine la volatilité réalisée et l&#39;écart au prix de tendance (trend spread).</li>
+</ul>
+</section>
+<!-- SECTION 4 -->
+<section id="onchain-macro">
+<h2 id="section-4">4. Observatoire On-Chain, Macro &amp; Sentiment</h2>
+<div class="visual-placeholder">
+                [Graphique/Infographie : Les 3 piliers de l&#39;analyse externe : Blockchain (On-chain), Économie (Macro), Psychologie (Sentiment)]
+            </div>
+<h3 id="section-4-1">4.1 Données On-Chain (Blockchain)</h3>
+<p>Surveillez l&#39;activité réelle sur le réseau Bitcoin :</p>
+<div class="grid-3">
+<div class="card">
+<h4>Frais &amp; Mempool</h4>
+<p>Frais Low/Medium/High. Un nombre élevé de transactions non confirmées (Unconfirmed tx) indique une congestion.</p>
+</div>
+<div class="card">
+<h4>Minage &amp; Sécurité</h4>
+<p><strong>Hashrate :</strong> Puissance de calcul (sécurité du réseau). <strong>Difficulty :</strong> Ajustement de la compétition entre mineurs.</p>
+</div>
+<div class="card">
+<h4>Halving &amp; Émission</h4>
+<p>Compte à rebours avant le prochain Halving et suivi de la progression vers les 21 millions de BTC (Total supply progress).</p>
+</div>
+</div>
+<h3 id="section-4-2">4.2 Tableau de Bord Macroéconomique</h3>
+<p>Comparez le Bitcoin aux grandes forces économiques traditionnelles (données FRED) :</p>
+<ul>
+<li><strong>US 10Y &amp; Fed Funds :</strong> Taux d&#39;intérêt. Des taux élevés peuvent peser sur l&#39;appétit pour le risque.</li>
+<li><strong>CPI YoY :</strong> Inflation annuelle. À lire en conjonction avec les taux d&#39;intérêt.</li>
+<li><strong>M2 &amp; DXY :</strong> Masse monétaire et force du Dollar. Un dollar fort (DXY) est souvent un vent contraire pour le BTC.</li>
+</ul>
+<h3 id="section-4-3">4.3 Sentiment &amp; Positionnement</h3>
+<p>Le terminal génère des &#34;Tags de Régime&#34; basés sur le <em>Fear &amp; Greed</em> et l&#39;action du prix :</p>
+<p>
+<span class="badge badge-green">Risk-on</span> (Environnement porteur) | 
+                <span class="badge badge-red">Panic</span> (Stress brutal) | 
+                <span class="badge badge-blue">Accumulation</span> (Zone de construction) | 
+                <span class="badge badge-gold">Overheated</span> (Risque de surchauffe).
+            </p>
+</section>
+<!-- SECTION 5 -->
+<section id="portfolio-alerts">
+<h2 id="section-5">5. Analyse de Portefeuille &amp; Alertes</h2>
+<h3 id="section-5-1">5.1 Simulateur de Portefeuille</h3>
+<p>Saisissez vos données (BTC détenus, prix d&#39;achat moyen, liquidités disponibles) pour obtenir une analyse tactique :</p>
+<div class="grid-2">
+<div class="card">
+<h4>Métriques Clés</h4>
+<ul>
+<li><strong>Unrealized P/L :</strong> Vos gains/pertes latents en valeur et en %.</li>
+<li><strong>Distance to break-even :</strong> Écart entre le prix actuel et votre point mort.</li>
+<li><strong>Share of 21M :</strong> Votre part symbolique sur l&#39;offre totale finale.</li>
+</ul>
+</div>
+<div class="card">
+<h4>Scénarios &amp; DCA</h4>
+<ul>
+<li><strong>Scenario strip :</strong> Valorisation de votre bag si le BTC atteint 150k, 250k, 500k ou 1M.</li>
+<li><strong>DCA summary :</strong> Impact d&#39;un achat immédiat avec vos liquidités sur votre prix moyen.</li>
+<li><strong>Scenario stance :</strong> Conseil automatisé (ex: suggestion de prise de profit si gains &gt; 35% et cible proche).</li>
+</ul>
+</div>
+</div>
+<h3 id="section-5-2">5.2 Zone de Signaux (Alerts)</h3>
+<p>La console transforme les indicateurs bruts en observations actionnables :</p>
+<ul>
+<li><em>Momentum expansion :</em> Variation 24H &gt; 4% (volatilité en hausse).</li>
+<li><em>Near all-time high zone :</em> Prix à moins de 10% de l&#39;ATH.</li>
+<li><em>Fee pressure elevated :</em> Frais &gt; 20 sat/vB (exécution on-chain coûteuse).</li>
+</ul>
+</section>
+<!-- SECTION 6 -->
+<section id="quick-read">
+<h2 id="section-6">6. Conseils de Lecture Rapide selon votre Profil</h2>
+<div class="grid-3">
+<div class="card" style="border-top: 4px solid var(--success-green);">
+<h4>⏱️ Le Coup d&#39;Œil (5 secondes)</h4>
+<p>Regardez dans cet ordre :</p>
+<ol>
+<li>Le Régime actuel</li>
+<li>Variations 7D et 30D</li>
+<li>Distance de l&#39;ATH</li>
+<li>Fear &amp; Greed</li>
+<li>Frais réseau (High fee)</li>
+</ol>
+</div>
+<div class="card" style="border-top: 4px solid var(--accent-blue);">
+<h4>📈 Le Trader (Court terme)</h4>
+<p>Concentrez-vous sur :</p>
+<ol>
+<li>Variation 24H &amp; Session range</li>
+<li>Graphique principal (1H/4H)</li>
+<li>EMA 21, SMA 20</li>
+<li>RSI, MACD et Volume</li>
+<li>Frais prioritaires</li>
+</ol>
+</div>
+<div class="card" style="border-top: 4px solid var(--warning-gold);">
+<h4>🏦 L&#39;Investisseur (Cycle/Macro)</h4>
+<p>Analysez le fond :</p>
+<ol>
+<li>Variation 30D &amp; Dominance</li>
+<li>Supply mined &amp; Halving</li>
+<li>Hashrate</li>
+<li>Comparaison BTC vs Macro (M2, Taux)</li>
+<li>Scénarios de portefeuille</li>
+</ol>
+</div>
+</div>
+</section>
+<div class="footer">
+<p><strong>Sources de données :</strong> CoinGecko (Prix, Market cap), Binance (Bougies OHLC), mempool.space (On-chain), Alternative.me (Sentiment), FRED (Macroéconomie).</p>
+<p style="margin-top: 1rem;">© 2026 BTC by JLV. Terminal d&#39;analyse statique basé sur des API publiques. Les scénarios de portefeuille ne tiennent pas compte des frais de plateforme ni de la fiscalité.</p>
+</div>
+</div>
+
+</body></html>
