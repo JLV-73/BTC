@@ -200,6 +200,7 @@ const DEFAULT_STATE = {
   currency: "USD",
   timeframe: "1H",
   range: "1",
+  chartPresetVersion: 2,
   autoRefresh: true,
   refreshInterval: 60000,
   compactMode: false,
@@ -215,15 +216,15 @@ const DEFAULT_STATE = {
     alerts: true
   },
   overlays: {
-    sma20: true,
-    sma50: true,
+    sma20: false,
+    sma50: false,
     sma200: false,
     ema21: true,
     vwap: false
   },
   panels: {
     volume: true,
-    rsi: true,
+    rsi: false,
     macd: false
   },
   macroEnabled: {
@@ -243,6 +244,8 @@ const DEFAULT_STATE = {
     baseCurrency: "USD"
   }
 };
+
+const CHART_PRESET_VERSION = DEFAULT_STATE.chartPresetVersion;
 
 const runtime = {
   charts: {},
@@ -283,12 +286,17 @@ const runtime = {
   lastRefresh: null
 };
 
-const appState = deepMerge(DEFAULT_STATE, loadStoredState());
+const storedState = loadStoredState();
+const appState = deepMerge(DEFAULT_STATE, storedState);
+const didUpgradePrimaryChartState = upgradePrimaryChartState(appState, storedState);
 
 document.addEventListener("DOMContentLoaded", init);
 
 async function init() {
   applyStateToDocument();
+  if (didUpgradePrimaryChartState) {
+    saveState(true);
+  }
   cacheControlValues();
   initCharts();
   bindEvents();
@@ -366,6 +374,21 @@ function deepMerge(base, extra) {
     output[key] = extraValue;
   });
   return output;
+}
+
+function upgradePrimaryChartState(state, persistedState) {
+  if (!isPlainObject(state?.overlays) || !isPlainObject(state?.panels)) {
+    return false;
+  }
+
+  if (Number(persistedState?.chartPresetVersion ?? 0) < CHART_PRESET_VERSION) {
+    state.overlays = structuredClone(DEFAULT_STATE.overlays);
+    state.panels = structuredClone(DEFAULT_STATE.panels);
+    state.chartPresetVersion = CHART_PRESET_VERSION;
+    return true;
+  }
+
+  return false;
 }
 
 function isPlainObject(value) {
@@ -1775,6 +1798,7 @@ function renderCandles() {
       name: "BTC",
       type: "candlestick",
       data: converted.map((candle) => [candle.open, candle.close, candle.low, candle.high]),
+      barMaxWidth: 18,
       itemStyle: {
         color: "#22c55e",
         color0: "#ef4444",
@@ -1797,8 +1821,8 @@ function renderCandles() {
       xAxisIndex: 0,
       yAxisIndex: 0,
       showSymbol: false,
-      smooth: true,
-      lineStyle: { width: 1.4, color: overlayColor(key) }
+      smooth: false,
+      lineStyle: { width: 1.25, color: overlayColor(key), opacity: 0.82 }
     });
   });
 
@@ -1807,6 +1831,7 @@ function renderCandles() {
       name: "Volume",
       type: "bar",
       data: volumeSeries,
+      barMaxWidth: 14,
       xAxisIndex: layout.panelIndexes.volume,
       yAxisIndex: layout.panelIndexes.volume
     });
@@ -1820,8 +1845,8 @@ function renderCandles() {
       xAxisIndex: layout.panelIndexes.rsi,
       yAxisIndex: layout.panelIndexes.rsi,
       showSymbol: false,
-      smooth: true,
-      lineStyle: { color: "#d6b26e", width: 1.5 }
+      smooth: false,
+      lineStyle: { color: "#d6b26e", width: 1.35 }
     });
   }
 
@@ -1865,11 +1890,34 @@ function renderCandles() {
     yAxis: layout.yAxes,
     dataZoom: [
       { type: "inside", xAxisIndex: layout.allXAxisIndexes },
-      { type: "slider", xAxisIndex: layout.allXAxisIndexes, height: 20, bottom: 4, borderColor: "rgba(255,255,255,0.08)", fillerColor: "rgba(93,209,255,0.08)" }
+      {
+        type: "slider",
+        xAxisIndex: layout.allXAxisIndexes,
+        height: 14,
+        bottom: 6,
+        borderColor: "rgba(255,255,255,0.04)",
+        backgroundColor: "rgba(255,255,255,0.015)",
+        fillerColor: "rgba(93,209,255,0.12)",
+        handleSize: "90%",
+        showDetail: false,
+        dataBackground: {
+          lineStyle: { color: "rgba(148,164,180,0.22)" },
+          areaStyle: { color: "rgba(148,164,180,0.05)" }
+        },
+        handleStyle: {
+          color: "rgba(93,209,255,0.55)",
+          borderColor: "rgba(93,209,255,0.22)"
+        },
+        moveHandleStyle: { color: "rgba(93,209,255,0.4)" }
+      }
     ],
     tooltip: {
       trigger: "axis",
-      axisPointer: { type: "cross" },
+      axisPointer: {
+        type: "line",
+        snap: true,
+        lineStyle: { color: "rgba(148,164,180,0.26)", width: 1 }
+      },
       backgroundColor: "rgba(7,9,13,0.96)",
       borderColor: "rgba(184,202,219,0.18)",
       textStyle: { color: "#eef2f6" }
@@ -2088,40 +2136,80 @@ function buildPrimaryLayout(categories) {
   const yAxes = [];
   const panelIndexes = {};
   const extras = [];
-  const chartGrid = { left: 50, right: 86 };
+  const chartGrid = { left: 18, right: 82 };
   if (appState.panels.volume) extras.push("volume");
   if (appState.panels.rsi) extras.push("rsi");
   if (appState.panels.macd) extras.push("macd");
 
-  const extraHeight = extras.length === 0 ? 0 : extras.length === 1 ? 18 : extras.length === 2 ? 14 : 11;
-  const mainHeight = extras.length === 0 ? 82 : extras.length === 1 ? 58 : extras.length === 2 ? 48 : 40;
-  let currentTop = 6;
+  const gap = 2.5;
+  const extraHeight = extras.length === 0 ? 0 : extras.length === 1 ? 16 : extras.length === 2 ? 12 : 10;
+  const mainHeight = extras.length === 0 ? 90 : extras.length === 1 ? 70 : extras.length === 2 ? 60 : 52;
+  let currentTop = 4;
   const allXAxisIndexes = [0];
 
   grids.push({ ...chartGrid, top: `${currentTop}%`, height: `${mainHeight}%` });
   xAxes.push(buildCategoryAxis(categories, extras.length === 0, 0));
-  yAxes.push(buildValueAxis((value) => formatPrimaryAxisLabel(value), { labelWidth: 72 }));
-  currentTop += mainHeight + 3;
+  yAxes.push(buildValueAxis((value) => formatPrimaryAxisLabel(value), {
+    gridIndex: 0,
+    labelWidth: 68,
+    splitNumber: 5
+  }));
+  currentTop += mainHeight + gap;
 
   extras.forEach((panel, index) => {
+    const gridIndex = index + 1;
     grids.push({ ...chartGrid, top: `${currentTop}%`, height: `${extraHeight}%` });
-    xAxes.push(buildCategoryAxis(categories, index === extras.length - 1, index + 1));
-    yAxes.push(buildValueAxis((value) => formatCompact(value, 1)));
-    panelIndexes[panel] = index + 1;
-    allXAxisIndexes.push(index + 1);
-    currentTop += extraHeight + 3;
+    xAxes.push(buildCategoryAxis(categories, index === extras.length - 1, gridIndex));
+    yAxes.push(buildPrimaryPanelAxis(panel, gridIndex));
+    panelIndexes[panel] = gridIndex;
+    allXAxisIndexes.push(gridIndex);
+    currentTop += extraHeight + gap;
   });
 
   return { grids, xAxes, yAxes, panelIndexes, allXAxisIndexes };
 }
 
-function buildCategoryAxis(categories, showLabels) {
+function buildPrimaryPanelAxis(panel, gridIndex) {
+  if (panel === "rsi") {
+    return buildValueAxis((value) => formatNumber(value, 0), {
+      gridIndex,
+      labelWidth: 34,
+      min: 0,
+      max: 100,
+      splitNumber: 3
+    });
+  }
+
+  if (panel === "macd") {
+    return buildValueAxis((value) => formatCompact(value, 2), {
+      gridIndex,
+      labelWidth: 48,
+      splitNumber: 3
+    });
+  }
+
+  return buildValueAxis((value) => formatCompact(value, 1), {
+    gridIndex,
+    labelWidth: 52,
+    splitNumber: 2
+  });
+}
+
+function buildCategoryAxis(categories, showLabels, gridIndex) {
   return {
     type: "category",
+    gridIndex,
     data: categories,
     boundaryGap: true,
-    axisLine: { lineStyle: { color: "rgba(184,202,219,0.16)" } },
-    axisLabel: { show: showLabels, color: "#94a4b4" },
+    axisLine: { lineStyle: { color: "rgba(184,202,219,0.12)" } },
+    axisTick: { show: false },
+    axisLabel: {
+      show: showLabels,
+      color: "#7f90a2",
+      hideOverlap: true,
+      margin: 10,
+      fontSize: 11
+    },
     splitLine: { show: false }
   };
 }
@@ -2132,15 +2220,26 @@ function buildValueAxis(formatter, options = {}) {
     type: "value",
     scale: true,
     position: "right",
-    axisLine: { lineStyle: { color: "rgba(184,202,219,0.16)" } },
+    gridIndex: options.gridIndex ?? 0,
+    min: options.min,
+    max: options.max,
+    splitNumber: options.splitNumber ?? 4,
+    axisLine: { show: false },
+    axisTick: { show: false },
     axisLabel: {
-      color: "#94a4b4",
+      color: "#7f90a2",
       formatter,
       width: labelWidth,
       overflow: "truncate",
-      margin: 12
+      margin: 10,
+      fontSize: 11
     },
-    splitLine: { lineStyle: { color: "rgba(184,202,219,0.08)" } }
+    splitLine: {
+      lineStyle: {
+        color: "rgba(184,202,219,0.06)",
+        type: "dashed"
+      }
+    }
   };
 }
 

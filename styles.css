@@ -591,7 +591,7 @@ body.is-compact .signal-box {
 }
 
 .primary-card {
-  min-height: 720px;
+  min-height: 780px;
 }
 
 .chart-toolbar,
@@ -625,7 +625,7 @@ body.is-compact .signal-box {
 }
 
 .primary-canvas {
-  height: 620px;
+  height: 700px;
 }
 
 .chart-rail {
@@ -644,9 +644,9 @@ body.has-primary-chart-focus {
 .primary-chart-stage.is-fullscreen-active,
 .primary-chart-stage:fullscreen {
   position: fixed;
-  inset: 12px;
+  inset: 8px;
   z-index: 120;
-  padding: 22px;
+  padding: 18px;
   grid-template-columns: minmax(0, 1fr);
   align-content: start;
   overflow: auto;
@@ -665,18 +665,21 @@ body.has-primary-chart-focus {
 
 .primary-chart-stage.is-fullscreen-active .primary-card,
 .primary-chart-stage:fullscreen .primary-card {
-  min-height: auto;
+  min-height: calc(100vh - 34px);
+  display: flex;
+  flex-direction: column;
 }
 
 .primary-chart-stage.is-fullscreen-active .chart-shell,
 .primary-chart-stage:fullscreen .chart-shell {
-  min-height: calc(100vh - 270px);
+  flex: 1;
+  min-height: calc(100vh - 210px);
 }
 
 .primary-chart-stage.is-fullscreen-active .primary-canvas,
 .primary-chart-stage:fullscreen .primary-canvas {
-  height: min(74vh, 980px);
-  min-height: 560px;
+  height: calc(100vh - 230px);
+  min-height: 760px;
 }
 
 .primary-chart-stage.is-fullscreen-active .chart-rail,
@@ -1227,6 +1230,22 @@ body.has-primary-chart-focus {
   .primary-chart-stage.is-fullscreen-active .chart-rail,
   .primary-chart-stage:fullscreen .chart-rail {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .primary-chart-stage.is-fullscreen-active .primary-card,
+  .primary-chart-stage:fullscreen .primary-card {
+    min-height: auto;
+  }
+
+  .primary-chart-stage.is-fullscreen-active .chart-shell,
+  .primary-chart-stage:fullscreen .chart-shell {
+    min-height: calc(100vh - 260px);
+  }
+
+  .primary-chart-stage.is-fullscreen-active .primary-canvas,
+  .primary-chart-stage:fullscreen .primary-canvas {
+    height: calc(100vh - 280px);
+    min-height: 420px;
   }
 
   .button-row,
